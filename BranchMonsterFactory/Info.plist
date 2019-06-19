@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>bnc_app_key</key>
-	<string>36930236817866882</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -13,7 +11,7 @@
 	<key>CFBundleIcons~ipad</key>
 	<dict/>
 	<key>CFBundleIdentifier</key>
-	<string>io.branchmetrics.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -30,7 +28,6 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>branchsters</string>
-				<string>fb288726397999326</string>
 			</array>
 		</dict>
 	</array>
@@ -40,6 +37,8 @@
 	<string>288726397999326</string>
 	<key>FacebookDisplayName</key>
 	<string>Branch Monster Factory</string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIMainStoryboardFile</key>
@@ -59,5 +58,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>branch_app_domain</key>
+	<string>https://isabellfrischmann.app.link/LHHhKBxsyX</string>
+	<key>branch_key</key>
+	<string>key_live_lcKsEaAWdc2SWqIgWVtncdcprtj8aUMA</string>
 </dict>
 </plist>

@@ -10,7 +10,8 @@
 #import "MonsterPreferences.h"
 #import "MonsterPartsFactory.h"
 #import "ImageCollectionViewCell.h"
-#import "Branch.h"
+#import <Branch/Branch.h>
+
 
 @interface MonsterCreatorViewController () <UICollectionViewDataSource, UICollectionViewDelegate>
 
@@ -39,7 +40,7 @@ static CGFloat SIDE_SPACE = 7.0;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     for (int i = 0; i < [self.colorViews count]; i++) {
         UIView *currView = [self.colorViews objectAtIndex:i];
         [currView setBackgroundColor:[MonsterPartsFactory colorForIndex:i]];
@@ -69,9 +70,9 @@ static CGFloat SIDE_SPACE = 7.0;
     UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
     toolbar.items = [NSArray arrayWithObject:barButton];
     
-    // track that the user viewed the monster edit page
+    // TODO: track that the user viewed the monster edit page
     [[Branch getInstance] userCompletedAction:@"monster_edit"];
-    
+    NSLog(@"Logged monster_edit");
     self.etxtName.inputAccessoryView = toolbar;
     [self.etxtName addTarget:self.etxtName
                       action:@selector(resignFirstResponder)
