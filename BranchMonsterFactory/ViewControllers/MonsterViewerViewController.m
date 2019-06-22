@@ -13,6 +13,8 @@
 #import <MessageUI/MessageUI.h>
 #import <Social/Social.h>
 #import <FacebookSDK/FacebookSDK.h>
+#import <Branch/Branch.h>
+
 
 @interface MonsterViewerViewController () <MFMessageComposeViewControllerDelegate>
 @property (strong, nonatomic) NetworkProgressBar *progressBar;
@@ -70,17 +72,58 @@ static CGFloat MONSTER_HEIGHT_FIVE = 0.55f;
                                       @"face_index",
                                       @"monster_name"]];
     
+    
     [self.cmdChange.layer setCornerRadius:3.0];
     
     self.progressBar = [[NetworkProgressBar alloc] initWithFrame:self.view.frame andMessage:@"preparing your Branchster.."];
     [self.progressBar show];
     [self.view addSubview:self.progressBar];
     
-    // #8 TODO: track that the user viewed the monster view page
-    
+    // #8 TODO: track that the user viewed the monster view page and the name of the monster
+//    NSString *event_name_monter_view = [@"monster_view_" stringByAppendingString:self.monsterMetadata[@"monster_name"]];
+//    [[Branch getInstance] userCompletedAction:event_name_monter_view];
+    [[Branch getInstance] userCompletedAction:@"monster_view" withState:self.monsterMetadata];
+
     // #9 TODO: load a URL just for display on the viewer page
-    self.urlTextView.text = @"";
-    [self.progressBar hide];
+    [[Branch getInstance] getShortUrlsWithParams:[self prepareBranchDict]
+                                    andChannel: @"inAppClick"
+                                    andCallback:^(NSString *url, NSError *error) {
+                                        self.urlTextView.text;
+                                        self.progressBar.hide;
+    }]
+    
+    [[Branch getInstance] getShortUrlWithParams: prepareBranchDict
+                                    andChannel:@"inAppClick"
+                                    andCallback:^(NSString *url, NSError *error) {
+        [self.etxtUrl setText:url];
+        [self.progressBar hide];
+    }]
+    
+    
+//
+//    BranchUniversalObject *buo = [[BranchUniversalObject alloc] initWithCanonicalIdentifier:@""];
+//    buo.contentMetadata.customMetadata[@"color_index"] = color_index_url;
+//
+//    BranchLinkProperties *lp = [[BranchLinkProperties alloc] init];
+//    lp.feature = @"inAppClick";
+//
+//    [lp addControlParam:@"$desktop_url" withValue: @"http://branch.io"];
+//    [lp addControlParam:@"$ios_url" withValue: @"http://branch.io"];
+//    [lp addControlParam:@"$ipad_url" withValue: @"http://branch.io"];
+//    [lp addControlParam:@"$android_url" withValue: @"http://branch.io"];
+//
+//    [lp addControlParam:@"color_index" withValue: color_index_url];
+//    [lp addControlParam:@"body_index" withValue: body_index_url];
+//    [lp addControlParam:@"face_index" withValue: face_index_url];
+//    [lp addControlParam:@"monster_name" withValue: monster_name_url];
+//
+//    [buo getShortUrlWithLinkProperties:lp andCallback:^(NSString* url, NSError* error) {
+//        if (!error) {
+//            NSLog(@"ShortUrl: %@", url);
+//            (void)(self.urlTextView.text = url);
+//            [self.progressBar hide];
+//        }
+//    }];
 }
 
 - (IBAction)cmdChangeClick:(id)sender {
@@ -169,11 +212,16 @@ static CGFloat MONSTER_HEIGHT_FIVE = 0.55f;
 }
 
 - (IBAction)cmdMessageClick:(id)sender {
-    // track that the user clicked the share via sms button and pass in the monster meta data
+    BranchEvent *link_event = [BranchEvent standardEvent:BranchStandardEventShare];
+    link_event.eventDescription = @"SMS share clicked";
+    [link_event logEvent];
+    
+    NSLog(@"%@", link_event);
     
     if([MFMessageComposeViewController canSendText]){
         [self.progressBar changeMessageTo:@"preparing message.."];
         [self.progressBar show];
+        
         
         MFMessageComposeViewController *smsViewController = [[MFMessageComposeViewController alloc] init];
         smsViewController.messageComposeDelegate = self;
@@ -181,11 +229,34 @@ static CGFloat MONSTER_HEIGHT_FIVE = 0.55f;
         // Create Branch link as soon as the user clicks
         // Pass in the special Branch dictionary of keys/values you want to receive in the AppDelegate on initSession
         // Specify the channel to be 'sms' for tracking on the Branch dashboard
-        [self.progressBar hide];
+        NSString *color_index_url = [self.prepareBranchDict valueForKey:@"color_index"];
+        NSString *body_index_url = [self.prepareBranchDict valueForKey:@"body_index"];
+        NSString *face_index_url = [self.prepareBranchDict valueForKey:@"face_index"];
+        NSString *monster_name_url = [self.prepareBranchDict valueForKey:@"monster_name"];
         
-        NSString *url = @"http://example.com"; // TODO: Remove when Branch is added
-        smsViewController.body = [NSString stringWithFormat:@"Check out my Branchster named %@ at %@", self.monsterName, url];
-        [self presentViewController:smsViewController animated:YES completion:nil];
+        BranchUniversalObject *buo2 = [[BranchUniversalObject alloc] initWithCanonicalIdentifier:@""];
+        buo2.contentMetadata.customMetadata[@"color_index"] = color_index_url;
+
+        
+        BranchLinkProperties *lp = [[BranchLinkProperties alloc] init];
+        lp.feature = @"inAppClick";
+        lp.channel = @"sms";
+        
+        [lp addControlParam:@"color_index" withValue: color_index_url];
+        [lp addControlParam:@"body_index" withValue: body_index_url];
+        [lp addControlParam:@"face_index" withValue: face_index_url];
+        [lp addControlParam:@"monster_name" withValue: monster_name_url];
+    
+        
+        [buo2 getShortUrlWithLinkProperties:lp andCallback:^(NSString* url, NSError* error) {
+            if (!error) {
+                (void)(self.urlTextView.text = url);
+                smsViewController.body = [NSString stringWithFormat:@"Check out my Branchster named %@ at %@", self.monsterName, url];
+                [self presentViewController:smsViewController animated:YES completion:nil];
+                [self.progressBar hide];
+            }
+        }];
+        
     } else {
         UIAlertView *alert_Dialog = [[UIAlertView alloc] initWithTitle:@"No Message Support" message:@"This device does not support messaging" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert_Dialog show];
@@ -199,7 +270,7 @@ static CGFloat MONSTER_HEIGHT_FIVE = 0.55f;
     if (MessageComposeResultSent == result) {
         
         // track successful share event via sms
-//        [[Branch getInstance] userCompletedAction:@"share_sms_success"];
+        [[Branch getInstance] userCompletedAction:@"share_sms_success"];
     }
     [self dismissViewControllerAnimated:YES completion:nil];
 }
